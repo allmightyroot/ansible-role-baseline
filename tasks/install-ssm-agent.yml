@@ -1,29 +1,45 @@
 ---
 - name: Install SSM Agent (Debian/Ubuntu)
   block:
+    - name: Check if SSM Agent is already installed via snap
+      command: snap list amazon-ssm-agent
+      register: ssm_snap_check
+      changed_when: false
+      failed_when: false
+
     - name: Download SSM Agent (x86_64)
       get_url:
         url: https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb
         dest: /tmp/amazon-ssm-agent.deb
         mode: '0644'
-      when: ansible_architecture == "x86_64"
+      when:
+        - ansible_architecture == "x86_64"
+        - ssm_snap_check.rc != 0  # Only download if not installed via snap
 
     - name: Download SSM Agent (arm64)
       get_url:
         url: https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_arm64/amazon-ssm-agent.deb
         dest: /tmp/amazon-ssm-agent.deb
         mode: '0644'
-      when: ansible_architecture == "aarch64"
+      when:
+        - ansible_architecture == "aarch64"
+        - ssm_snap_check.rc != 0  # Only download if not installed via snap
 
     - name: Install SSM Agent package
       apt:
         deb: /tmp/amazon-ssm-agent.deb
         state: present
+      when: ssm_snap_check.rc != 0  # Only install dpkg if not installed via snap
 
     - name: Clean up SSM Agent installer
       file:
         path: /tmp/amazon-ssm-agent.deb
         state: absent
+
+    - name: Message for snap-installed SSM Agent
+      debug:
+        msg: "SSM Agent is already installed via snap, skipping dpkg installation"
+      when: ssm_snap_check.rc == 0
   when: ansible_os_family == "Debian"
 
 - name: Install SSM Agent (openSUSE/SLES)
