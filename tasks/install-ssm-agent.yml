@@ -70,8 +70,20 @@
         state: absent
   when: ansible_os_family == "Suse"
 
-- name: Enable and start SSM Agent
+- name: Enable and start SSM Agent (dpkg version)
   service:
     name: amazon-ssm-agent
     enabled: "{{ baseline_ssm_agent_enabled }}"
     state: "{{ 'started' if baseline_ssm_agent_enabled else 'stopped' }}"
+  when:
+    - ansible_os_family in ["Debian", "Suse"]
+    - ssm_snap_check is not defined or ssm_snap_check.rc != 0
+
+- name: Enable and start SSM Agent (snap version)
+  service:
+    name: snap.amazon-ssm-agent.amazon-ssm-agent
+    enabled: "{{ baseline_ssm_agent_enabled }}"
+    state: "{{ 'started' if baseline_ssm_agent_enabled else 'stopped' }}"
+  when:
+    - ansible_os_family == "Debian"
+    - ssm_snap_check is defined and ssm_snap_check.rc == 0
