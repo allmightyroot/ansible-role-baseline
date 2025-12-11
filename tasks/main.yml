@@ -1,0 +1,48 @@
+---
+# tasks file for baseline
+
+- name: Detect cloud provider
+  include_tasks: detect-cloud-provider.yml
+  when: baseline_detect_cloud_provider | bool
+
+- name: Update system packages
+  include_tasks: "update-{{ ansible_os_family | lower }}.yml"
+  when: baseline_update_system | bool
+
+- name: Install base packages
+  package:
+    name: "{{ baseline_packages }}"
+    state: present
+
+- name: Install ZSH
+  include_tasks: install-zsh.yml
+  when: baseline_install_zsh | bool
+
+- name: Rotate SSH host keys
+  include_tasks: rotate-ssh-keys.yml
+  when: baseline_rotate_ssh_keys | bool
+
+- name: Install AWS CLI
+  include_tasks: install-aws-cli.yml
+  when:
+    - baseline_install_aws_cli | bool
+    - cloud_provider is defined
+    - cloud_provider == "aws"
+
+- name: Install AWS SSM Agent
+  include_tasks: install-ssm-agent.yml
+  when:
+    - baseline_install_ssm_agent | bool
+    - cloud_provider is defined
+    - cloud_provider == "aws"
+
+- name: Install AWS CloudWatch Agent
+  include_tasks: install-cloudwatch-agent.yml
+  when:
+    - baseline_install_cloudwatch_agent | bool
+    - cloud_provider is defined
+    - cloud_provider == "aws"
+
+- name: Install and configure etckeeper
+  include_tasks: install-etckeeper.yml
+  when: baseline_install_etckeeper | bool

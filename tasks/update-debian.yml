@@ -1,0 +1,11 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: "{{ baseline_update_cache_valid_time }}"
+
+- name: Upgrade all packages (Debian/Ubuntu)
+  apt:
+    upgrade: dist
+    autoremove: yes
+    autoclean: yes

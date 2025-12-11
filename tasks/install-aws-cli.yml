@@ -1,0 +1,76 @@
+---
+- name: Check if AWS CLI is already installed
+  command: aws --version
+  register: aws_cli_check
+  ignore_errors: yes
+  changed_when: false
+
+- name: Install AWS CLI v2 (x86_64)
+  block:
+    - name: Download AWS CLI v2 installer (x86_64)
+      get_url:
+        url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+        dest: /tmp/awscliv2.zip
+        mode: '0644'
+
+    - name: Unzip AWS CLI installer
+      unarchive:
+        src: /tmp/awscliv2.zip
+        dest: /tmp/
+        remote_src: yes
+
+    - name: Install AWS CLI v2
+      command: /tmp/aws/install --update
+      args:
+        creates: /usr/local/bin/aws
+
+    - name: Clean up installer files
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/awscliv2.zip
+        - /tmp/aws
+  when:
+    - baseline_aws_cli_version == "2"
+    - ansible_architecture == "x86_64"
+    - aws_cli_check.rc != 0
+
+- name: Install AWS CLI v2 (arm64)
+  block:
+    - name: Download AWS CLI v2 installer (arm64)
+      get_url:
+        url: https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip
+        dest: /tmp/awscliv2.zip
+        mode: '0644'
+
+    - name: Unzip AWS CLI installer
+      unarchive:
+        src: /tmp/awscliv2.zip
+        dest: /tmp/
+        remote_src: yes
+
+    - name: Install AWS CLI v2
+      command: /tmp/aws/install --update
+      args:
+        creates: /usr/local/bin/aws
+
+    - name: Clean up installer files
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/awscliv2.zip
+        - /tmp/aws
+  when:
+    - baseline_aws_cli_version == "2"
+    - ansible_architecture == "aarch64"
+    - aws_cli_check.rc != 0
+
+- name: Install AWS CLI v1 (pip)
+  pip:
+    name: awscli
+    state: present
+  when:
+    - baseline_aws_cli_version == "1"
+    - aws_cli_check.rc != 0

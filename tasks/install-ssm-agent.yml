@@ -1,0 +1,61 @@
+---
+- name: Install SSM Agent (Debian/Ubuntu)
+  block:
+    - name: Download SSM Agent (x86_64)
+      get_url:
+        url: https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb
+        dest: /tmp/amazon-ssm-agent.deb
+        mode: '0644'
+      when: ansible_architecture == "x86_64"
+
+    - name: Download SSM Agent (arm64)
+      get_url:
+        url: https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_arm64/amazon-ssm-agent.deb
+        dest: /tmp/amazon-ssm-agent.deb
+        mode: '0644'
+      when: ansible_architecture == "aarch64"
+
+    - name: Install SSM Agent package
+      apt:
+        deb: /tmp/amazon-ssm-agent.deb
+        state: present
+
+    - name: Clean up SSM Agent installer
+      file:
+        path: /tmp/amazon-ssm-agent.deb
+        state: absent
+  when: ansible_os_family == "Debian"
+
+- name: Install SSM Agent (openSUSE/SLES)
+  block:
+    - name: Download SSM Agent (x86_64)
+      get_url:
+        url: https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+        dest: /tmp/amazon-ssm-agent.rpm
+        mode: '0644'
+      when: ansible_architecture == "x86_64"
+
+    - name: Download SSM Agent (arm64)
+      get_url:
+        url: https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_arm64/amazon-ssm-agent.rpm
+        dest: /tmp/amazon-ssm-agent.rpm
+        mode: '0644'
+      when: ansible_architecture == "aarch64"
+
+    - name: Install SSM Agent package (zypper)
+      community.general.zypper:
+        name: /tmp/amazon-ssm-agent.rpm
+        state: present
+        disable_gpg_check: yes
+
+    - name: Clean up SSM Agent installer
+      file:
+        path: /tmp/amazon-ssm-agent.rpm
+        state: absent
+  when: ansible_os_family == "Suse"
+
+- name: Enable and start SSM Agent
+  service:
+    name: amazon-ssm-agent
+    enabled: "{{ baseline_ssm_agent_enabled }}"
+    state: "{{ 'started' if baseline_ssm_agent_enabled else 'stopped' }}"

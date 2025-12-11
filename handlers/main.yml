@@ -1,0 +1,12 @@
+---
+# handlers file for baseline
+
+- name: restart sshd
+  service:
+    name: "{{ 'ssh' if ansible_os_family == 'Debian' else 'sshd' }}"
+    state: restarted
+
+- name: etckeeper init
+  command: etckeeper init
+  args:
+    creates: /etc/.git

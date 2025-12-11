@@ -1,0 +1,33 @@
+---
+- name: Install etckeeper
+  package:
+    name: etckeeper
+    state: present
+
+- name: Configure etckeeper VCS
+  lineinfile:
+    path: /etc/etckeeper/etckeeper.conf
+    regexp: '^VCS='
+    line: 'VCS="{{ baseline_etckeeper_vcs }}"'
+  notify: etckeeper init
+
+- name: Initialize etckeeper repository
+  command: etckeeper init
+  args:
+    creates: /etc/.git
+  when: baseline_etckeeper_vcs == "git"
+
+- name: Initialize etckeeper repository (hg)
+  command: etckeeper init
+  args:
+    creates: /etc/.hg
+  when: baseline_etckeeper_vcs == "hg"
+
+- name: Commit initial etckeeper state
+  shell: |
+    cd /etc
+    if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
+      etckeeper commit "Initial commit by Ansible"
+    fi
+  when: baseline_etckeeper_vcs == "git"
+  changed_when: false

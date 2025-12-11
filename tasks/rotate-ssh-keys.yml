@@ -1,0 +1,82 @@
+---
+# Remove all SSH host keys so they will be regenerated on first boot
+# This ensures each instance has unique host keys
+
+- name: Remove existing SSH host keys
+  file:
+    path: "/etc/ssh/ssh_host_*_key"
+    state: absent
+  ignore_errors: yes
+
+- name: Remove existing SSH host key public keys
+  shell: rm -f /etc/ssh/ssh_host_*_key.pub
+  changed_when: false
+
+- name: Create SSH host key regeneration script
+  copy:
+    dest: /usr/local/bin/regenerate-ssh-host-keys.sh
+    mode: '0755'
+    owner: root
+    group: root
+    content: |
+      #!/bin/bash
+      # Regenerate SSH host keys on first boot
+      # This ensures each instance has unique keys
+
+      set -e
+
+      MARKER_FILE="/var/lib/ssh-host-keys-regenerated"
+
+      # Check if already regenerated
+      if [ -f "$MARKER_FILE" ]; then
+          echo "SSH host keys already regenerated"
+          exit 0
+      fi
+
+      echo "Regenerating SSH host keys..."
+
+      # Remove any existing keys
+      rm -f /etc/ssh/ssh_host_*_key /etc/ssh/ssh_host_*_key.pub
+
+      # Generate ed25519 key only
+      ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key -N '' -q
+
+      # Set correct permissions
+      chmod 600 /etc/ssh/ssh_host_ed25519_key
+      chmod 644 /etc/ssh/ssh_host_ed25519_key.pub
+      chown root:root /etc/ssh/ssh_host_ed25519_key /etc/ssh/ssh_host_ed25519_key.pub
+
+      # Create marker file
+      touch "$MARKER_FILE"
+
+      # Restart SSH
+      systemctl restart sshd || systemctl restart ssh
+
+      echo "SSH host keys regenerated successfully"
+
+- name: Create systemd service for SSH key regeneration
+  copy:
+    dest: /etc/systemd/system/regenerate-ssh-host-keys.service
+    mode: '0644'
+    owner: root
+    group: root
+    content: |
+      [Unit]
+      Description=Regenerate SSH host keys on first boot
+      After=network.target
+      Before=sshd.service ssh.service
+      ConditionPathExists=!/var/lib/ssh-host-keys-regenerated
+
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/local/bin/regenerate-ssh-host-keys.sh
+      RemainAfterExit=yes
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Enable SSH key regeneration service
+  systemd:
+    name: regenerate-ssh-host-keys.service
+    enabled: yes
+    daemon_reload: yes

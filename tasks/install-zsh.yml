@@ -1,0 +1,11 @@
+---
+- name: Install ZSH
+  package:
+    name: zsh
+    state: present
+
+- name: Set ZSH as default shell for root
+  user:
+    name: root
+    shell: /bin/zsh
+  when: baseline_zsh_default_shell | bool
