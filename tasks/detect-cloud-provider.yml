@@ -11,6 +11,17 @@
   failed_when: false
   changed_when: false
 
+- name: Check if Azure metadata endpoint is reachable
+  wait_for:
+    host: 169.254.169.254
+    port: 80
+    timeout: 1
+    state: started
+  register: azure_endpoint_check
+  failed_when: false
+  changed_when: false
+  when: cloud_provider is not defined
+
 - name: Check for Azure metadata service
   uri:
     url: http://169.254.169.254/metadata/instance?api-version=2021-02-01
@@ -21,6 +32,20 @@
   register: azure_metadata
   failed_when: false
   changed_when: false
+  when:
+    - cloud_provider is not defined
+    - azure_endpoint_check is succeeded
+
+- name: Check if GCP metadata endpoint is reachable
+  wait_for:
+    host: metadata.google.internal
+    port: 80
+    timeout: 1
+    state: started
+  register: gcp_endpoint_check
+  failed_when: false
+  changed_when: false
+  when: cloud_provider is not defined
 
 - name: Check for GCP metadata service
   uri:
@@ -32,6 +57,9 @@
   register: gcp_metadata
   failed_when: false
   changed_when: false
+  when:
+    - cloud_provider is not defined
+    - gcp_endpoint_check is succeeded
 
 - name: Set cloud provider fact - AWS
   set_fact:
@@ -42,6 +70,7 @@
   set_fact:
     cloud_provider: "azure"
   when:
+    - azure_metadata is defined
     - azure_metadata.status == 200
     - cloud_provider is not defined
 
@@ -49,6 +78,7 @@
   set_fact:
     cloud_provider: "gcp"
   when:
+    - gcp_metadata is defined
     - gcp_metadata.status == 200
     - cloud_provider is not defined
 
