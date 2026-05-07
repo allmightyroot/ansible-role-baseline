@@ -33,7 +33,7 @@
         - /tmp/aws
   when:
     - baseline_aws_cli_version == "2"
-    - ansible_architecture == "x86_64"
+    - ansible_facts["architecture"] == "x86_64"
     - aws_cli_check.rc != 0
 
 - name: Install AWS CLI v2 (arm64)
@@ -64,7 +64,7 @@
         - /tmp/aws
   when:
     - baseline_aws_cli_version == "2"
-    - ansible_architecture == "aarch64"
+    - ansible_facts["architecture"] == "aarch64"
     - aws_cli_check.rc != 0
 
 - name: Install AWS CLI v1 (pip)

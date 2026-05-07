@@ -6,7 +6,7 @@
   when: baseline_detect_cloud_provider | bool
 
 - name: Update system packages
-  include_tasks: "update-{{ ansible_os_family | lower }}.yml"
+  include_tasks: "update-{{ ansible_facts['os_family'] | lower }}.yml"
   when: baseline_update_system | bool
 
 - name: Install base packages
