@@ -11,6 +11,17 @@
     line: 'VCS="{{ baseline_etckeeper_vcs }}"'
   notify: etckeeper init
 
+- name: Configure git identity for etckeeper
+  git_config:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    scope: system
+  loop:
+    - { name: "user.email", value: "root@localhost" }
+    - { name: "user.name", value: "root" }
+    - { name: "init.defaultBranch", value: "main" }
+  when: baseline_etckeeper_vcs == "git"
+
 - name: Initialize etckeeper repository
   command: etckeeper init
   args:
