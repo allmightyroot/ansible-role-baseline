@@ -35,8 +35,10 @@ baseline_install_ssm_agent: true
 baseline_ssm_agent_enabled: true
 
 # AWS CloudWatch Agent
-baseline_install_cloudwatch_agent: true
-baseline_cloudwatch_agent_enabled: false  # Enable manually with config
+# Not installed in AMI builds - install and configure together at boot time
+# via cloud-init, SSM, or Ansible. Use amazon-cloudwatch-agent-ctl to fetch
+# config from SSM Parameter Store on first boot.
+baseline_install_cloudwatch_agent: false
 
 # etckeeper for tracking /etc changes
 baseline_install_etckeeper: true
