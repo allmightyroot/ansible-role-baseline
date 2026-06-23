@@ -76,6 +76,7 @@
     enabled: "{{ baseline_ssm_agent_enabled }}"
     state: "{{ 'started' if baseline_ssm_agent_enabled else 'stopped' }}"
   when:
+    - baseline_ssm_agent_manage_service | bool
     - ansible_facts["os_family"] in ["Debian", "Suse"]
     - ssm_snap_check is not defined or ssm_snap_check.rc != 0
 
@@ -85,5 +86,6 @@
     enabled: "{{ baseline_ssm_agent_enabled }}"
     state: "{{ 'started' if baseline_ssm_agent_enabled else 'stopped' }}"
   when:
+    - baseline_ssm_agent_manage_service | bool
     - ansible_facts["os_family"] == "Debian"
     - ssm_snap_check is defined and ssm_snap_check.rc == 0
