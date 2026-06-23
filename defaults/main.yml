@@ -30,11 +30,6 @@ baseline_zsh_default_shell: false  # Set to true to make zsh default
 baseline_install_aws_cli: true
 baseline_aws_cli_version: "2"  # "1" or "2"
 
-# AWS SSM Agent
-# Ubuntu 26.04+ AMIs ship with SSM agent pre-installed as a snap - no install needed
-baseline_install_ssm_agent: true
-baseline_ssm_agent_enabled: true
-baseline_ssm_agent_manage_service: true  # Set false in Packer builds; snap auto-starts on boot
 
 # AWS CloudWatch Agent
 # Not installed in AMI builds - install and configure together at boot time

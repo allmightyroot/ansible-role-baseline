@@ -29,13 +29,6 @@
     - cloud_provider is defined
     - cloud_provider == "aws"
 
-- name: Install AWS SSM Agent
-  include_tasks: install-ssm-agent.yml
-  when:
-    - baseline_install_ssm_agent | bool
-    - cloud_provider is defined
-    - cloud_provider == "aws"
-
 - name: Install and configure etckeeper
   include_tasks: install-etckeeper.yml
   when: baseline_install_etckeeper | bool
