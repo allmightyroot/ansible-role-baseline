@@ -15,10 +15,20 @@
         mode: '0644'
       when: ansible_facts["architecture"] == "aarch64"
 
+    - name: Mask CloudWatch Agent service before install to prevent postinstall hang
+      systemd:
+        name: amazon-cloudwatch-agent
+        masked: true
+
     - name: Install CloudWatch Agent package
       apt:
         deb: /tmp/amazon-cloudwatch-agent.deb
         state: present
+
+    - name: Unmask CloudWatch Agent service
+      systemd:
+        name: amazon-cloudwatch-agent
+        masked: false
 
     - name: Clean up CloudWatch Agent installer
       file:
