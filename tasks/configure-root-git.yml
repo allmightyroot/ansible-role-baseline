@@ -1,0 +1,10 @@
+---
+- name: Configure git identity for root
+  git_config:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    scope: system
+  loop:
+    - { name: "user.email", value: "root@localhost" }
+    - { name: "user.name", value: "root" }
+    - { name: "init.defaultBranch", value: "main" }

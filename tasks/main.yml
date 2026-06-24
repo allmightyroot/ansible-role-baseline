@@ -29,6 +29,10 @@
     - cloud_provider is defined
     - cloud_provider == "aws"
 
+- name: Configure root git identity
+  include_tasks: configure-root-git.yml
+  when: baseline_install_etckeeper | bool
+
 - name: Install and configure etckeeper
   include_tasks: install-etckeeper.yml
   when: baseline_install_etckeeper | bool
