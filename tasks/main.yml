@@ -2,37 +2,37 @@
 # tasks file for baseline
 
 - name: Detect cloud provider
-  include_tasks: detect-cloud-provider.yml
+  ansible.builtin.include_tasks: detect-cloud-provider.yml
   when: baseline_detect_cloud_provider | bool
 
 - name: Update system packages
-  include_tasks: "update-{{ ansible_facts['os_family'] | lower }}.yml"
+  ansible.builtin.include_tasks: "update-{{ ansible_facts['os_family'] | lower }}.yml"
   when: baseline_update_system | bool
 
 - name: Install base packages
-  package:
+  ansible.builtin.package:
     name: "{{ baseline_packages }}"
     state: present
 
 - name: Install ZSH
-  include_tasks: install-zsh.yml
+  ansible.builtin.include_tasks: install-zsh.yml
   when: baseline_install_zsh | bool
 
 - name: Rotate SSH host keys
-  include_tasks: rotate-ssh-keys.yml
+  ansible.builtin.include_tasks: rotate-ssh-keys.yml
   when: baseline_rotate_ssh_keys | bool
 
 - name: Install AWS CLI
-  include_tasks: install-aws-cli.yml
+  ansible.builtin.include_tasks: install-aws-cli.yml
   when:
     - baseline_install_aws_cli | bool
     - cloud_provider is defined
     - cloud_provider == "aws"
 
 - name: Configure root git identity
-  include_tasks: configure-root-git.yml
+  ansible.builtin.include_tasks: configure-root-git.yml
   when: baseline_install_etckeeper | bool
 
 - name: Install and configure etckeeper
-  include_tasks: install-etckeeper.yml
+  ansible.builtin.include_tasks: install-etckeeper.yml
   when: baseline_install_etckeeper | bool

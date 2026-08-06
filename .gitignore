@@ -2,6 +2,7 @@
 *.retry
 .molecule/
 .cache/
+.ansible/
 
 # Python
 __pycache__/

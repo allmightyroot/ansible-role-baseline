@@ -1,74 +1,74 @@
 ---
 - name: Check if AWS CLI is already installed
-  command: aws --version
+  ansible.builtin.command: aws --version
   register: aws_cli_check
-  ignore_errors: yes
+  ignore_errors: true
   changed_when: false
 
 - name: Install AWS CLI v2 (x86_64)
-  block:
-    - name: Download AWS CLI v2 installer (x86_64)
-      get_url:
-        url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
-        dest: /tmp/awscliv2.zip
-        mode: '0644'
-
-    - name: Unzip AWS CLI installer
-      unarchive:
-        src: /tmp/awscliv2.zip
-        dest: /tmp/
-        remote_src: yes
-
-    - name: Install AWS CLI v2
-      command: /tmp/aws/install --update
-      args:
-        creates: /usr/local/bin/aws
-
-    - name: Clean up installer files
-      file:
-        path: "{{ item }}"
-        state: absent
-      loop:
-        - /tmp/awscliv2.zip
-        - /tmp/aws
   when:
     - baseline_aws_cli_version == "2"
     - ansible_facts["architecture"] == "x86_64"
     - aws_cli_check.rc != 0
 
-- name: Install AWS CLI v2 (arm64)
   block:
-    - name: Download AWS CLI v2 installer (arm64)
-      get_url:
-        url: https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip
+    - name: Download AWS CLI v2 installer (x86_64)
+      ansible.builtin.get_url:
+        url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
         dest: /tmp/awscliv2.zip
-        mode: '0644'
+        mode: "0644"
 
     - name: Unzip AWS CLI installer
-      unarchive:
+      ansible.builtin.unarchive:
         src: /tmp/awscliv2.zip
         dest: /tmp/
-        remote_src: yes
+        remote_src: true
 
     - name: Install AWS CLI v2
-      command: /tmp/aws/install --update
+      ansible.builtin.command: /tmp/aws/install --update
       args:
         creates: /usr/local/bin/aws
 
     - name: Clean up installer files
-      file:
+      ansible.builtin.file:
         path: "{{ item }}"
         state: absent
       loop:
         - /tmp/awscliv2.zip
         - /tmp/aws
+- name: Install AWS CLI v2 (arm64)
   when:
     - baseline_aws_cli_version == "2"
     - ansible_facts["architecture"] == "aarch64"
     - aws_cli_check.rc != 0
 
+  block:
+    - name: Download AWS CLI v2 installer (arm64)
+      ansible.builtin.get_url:
+        url: https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip
+        dest: /tmp/awscliv2.zip
+        mode: "0644"
+
+    - name: Unzip AWS CLI installer
+      ansible.builtin.unarchive:
+        src: /tmp/awscliv2.zip
+        dest: /tmp/
+        remote_src: true
+
+    - name: Install AWS CLI v2
+      ansible.builtin.command: /tmp/aws/install --update
+      args:
+        creates: /usr/local/bin/aws
+
+    - name: Clean up installer files
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/awscliv2.zip
+        - /tmp/aws
 - name: Install AWS CLI v1 (pip)
-  pip:
+  ansible.builtin.pip:
     name: awscli
     state: present
   when:

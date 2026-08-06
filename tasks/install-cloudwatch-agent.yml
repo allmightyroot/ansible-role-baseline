@@ -1,71 +1,71 @@
 ---
 - name: Install CloudWatch Agent (Debian/Ubuntu)
+  when: ansible_facts["os_family"] == "Debian"
+
   block:
     - name: Download CloudWatch Agent (x86_64)
-      get_url:
+      ansible.builtin.get_url:
         url: https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
         dest: /tmp/amazon-cloudwatch-agent.deb
-        mode: '0644'
+        mode: "0644"
       when: ansible_facts["architecture"] == "x86_64"
 
     - name: Download CloudWatch Agent (arm64)
-      get_url:
+      ansible.builtin.get_url:
         url: https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/arm64/latest/amazon-cloudwatch-agent.deb
         dest: /tmp/amazon-cloudwatch-agent.deb
-        mode: '0644'
+        mode: "0644"
       when: ansible_facts["architecture"] == "aarch64"
 
     - name: Mask CloudWatch Agent service before install to prevent postinstall hang
-      systemd:
+      ansible.builtin.systemd:
         name: amazon-cloudwatch-agent
         masked: true
 
     - name: Install CloudWatch Agent package
-      apt:
+      ansible.builtin.apt:
         deb: /tmp/amazon-cloudwatch-agent.deb
         state: present
 
     - name: Unmask CloudWatch Agent service
-      systemd:
+      ansible.builtin.systemd:
         name: amazon-cloudwatch-agent
         masked: false
 
     - name: Clean up CloudWatch Agent installer
-      file:
+      ansible.builtin.file:
         path: /tmp/amazon-cloudwatch-agent.deb
         state: absent
-  when: ansible_facts["os_family"] == "Debian"
-
 - name: Install CloudWatch Agent (openSUSE/SLES)
+  when: ansible_facts["os_family"] == "Suse"
+
   block:
     - name: Download CloudWatch Agent (x86_64)
-      get_url:
+      ansible.builtin.get_url:
         url: https://s3.amazonaws.com/amazoncloudwatch-agent/redhat/amd64/latest/amazon-cloudwatch-agent.rpm
         dest: /tmp/amazon-cloudwatch-agent.rpm
-        mode: '0644'
+        mode: "0644"
       when: ansible_facts["architecture"] == "x86_64"
 
     - name: Download CloudWatch Agent (arm64)
-      get_url:
+      ansible.builtin.get_url:
         url: https://s3.amazonaws.com/amazoncloudwatch-agent/redhat/arm64/latest/amazon-cloudwatch-agent.rpm
         dest: /tmp/amazon-cloudwatch-agent.rpm
-        mode: '0644'
+        mode: "0644"
       when: ansible_facts["architecture"] == "aarch64"
 
     - name: Install CloudWatch Agent package (zypper)
       community.general.zypper:
         name: /tmp/amazon-cloudwatch-agent.rpm
         state: present
-        disable_gpg_check: yes
+        disable_gpg_check: true
 
     - name: Clean up CloudWatch Agent installer
-      file:
+      ansible.builtin.file:
         path: /tmp/amazon-cloudwatch-agent.rpm
         state: absent
-  when: ansible_facts["os_family"] == "Suse"
-
 - name: Enable CloudWatch Agent (but don't start without config)
-  service:
+  ansible.builtin.service:
     name: amazon-cloudwatch-agent
     enabled: "{{ baseline_cloudwatch_agent_enabled }}"
     state: stopped

@@ -1,7 +1,7 @@
 ---
 - name: Update all packages (openSUSE/SLES - zypper)
   community.general.zypper:
-    name: '*'
+    name: "*"
     state: latest
-    update_cache: yes
+    update_cache: true
   when: ansible_facts["pkg_mgr"] == 'zypper'

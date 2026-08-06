@@ -1,6 +1,6 @@
 ---
 - name: Configure git identity for root
-  git_config:
+  community.general.git_config:
     name: "{{ item.name }}"
     value: "{{ item.value }}"
     scope: system

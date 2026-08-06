@@ -3,19 +3,19 @@
 # This ensures each instance has unique host keys
 
 - name: Remove existing SSH host keys
-  file:
+  ansible.builtin.file:
     path: "/etc/ssh/ssh_host_*_key"
     state: absent
-  ignore_errors: yes
+  failed_when: false
 
 - name: Remove existing SSH host key public keys
-  shell: rm -f /etc/ssh/ssh_host_*_key.pub
+  ansible.builtin.shell: rm -f /etc/ssh/ssh_host_*_key.pub
   changed_when: false
 
 - name: Create SSH host key regeneration script
-  copy:
+  ansible.builtin.copy:
     dest: /usr/local/bin/regenerate-ssh-host-keys.sh
-    mode: '0755'
+    mode: "0755"
     owner: root
     group: root
     content: |
@@ -55,9 +55,9 @@
       echo "SSH host keys regenerated successfully"
 
 - name: Create systemd service for SSH key regeneration
-  copy:
+  ansible.builtin.copy:
     dest: /etc/systemd/system/regenerate-ssh-host-keys.service
-    mode: '0644'
+    mode: "0644"
     owner: root
     group: root
     content: |
@@ -76,7 +76,7 @@
       WantedBy=multi-user.target
 
 - name: Enable SSH key regeneration service
-  systemd:
+  ansible.builtin.systemd:
     name: regenerate-ssh-host-keys.service
-    enabled: yes
-    daemon_reload: yes
+    enabled: true
+    daemon_reload: true

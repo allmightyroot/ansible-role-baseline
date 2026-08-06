@@ -6,7 +6,7 @@ baseline_detect_cloud_provider: true
 
 # System updates
 baseline_update_system: true
-baseline_update_cache_valid_time: 3600  # 1 hour
+baseline_update_cache_valid_time: 3600 # 1 hour
 
 # Base packages to install everywhere
 baseline_packages:
@@ -24,12 +24,11 @@ baseline_packages:
 
 # ZSH configuration
 baseline_install_zsh: true
-baseline_zsh_default_shell: false  # Set to true to make zsh default
+baseline_zsh_default_shell: false # Set to true to make zsh default
 
 # AWS CLI
 baseline_install_aws_cli: true
-baseline_aws_cli_version: "2"  # "1" or "2"
-
+baseline_aws_cli_version: "2" # "1" or "2"
 
 # AWS CloudWatch Agent
 # Not installed in AMI builds - install and configure together at boot time
@@ -39,7 +38,7 @@ baseline_install_cloudwatch_agent: false
 
 # etckeeper for tracking /etc changes
 baseline_install_etckeeper: true
-baseline_etckeeper_vcs: "git"  # git or hg
+baseline_etckeeper_vcs: "git" # git or hg
 
 # SSH host key rotation (on first boot via systemd service)
 baseline_rotate_ssh_keys: true

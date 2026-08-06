@@ -3,7 +3,7 @@
 # This allows conditional installation of cloud-specific tooling
 
 - name: Check for AWS metadata service
-  uri:
+  ansible.builtin.uri:
     url: http://169.254.169.254/latest/meta-data/
     timeout: 2
     status_code: [200, 404]
@@ -12,7 +12,7 @@
   changed_when: false
 
 - name: Check if Azure metadata endpoint is reachable
-  wait_for:
+  ansible.builtin.wait_for:
     host: 169.254.169.254
     port: 80
     timeout: 1
@@ -23,7 +23,7 @@
   when: cloud_provider is not defined
 
 - name: Check for Azure metadata service
-  uri:
+  ansible.builtin.uri:
     url: http://169.254.169.254/metadata/instance?api-version=2021-02-01
     timeout: 2
     headers:
@@ -37,7 +37,7 @@
     - azure_endpoint_check is succeeded
 
 - name: Check if GCP metadata endpoint is reachable
-  wait_for:
+  ansible.builtin.wait_for:
     host: metadata.google.internal
     port: 80
     timeout: 1
@@ -48,7 +48,7 @@
   when: cloud_provider is not defined
 
 - name: Check for GCP metadata service
-  uri:
+  ansible.builtin.uri:
     url: http://metadata.google.internal/computeMetadata/v1/
     timeout: 2
     headers:
@@ -62,12 +62,12 @@
     - gcp_endpoint_check is succeeded
 
 - name: Set cloud provider fact - AWS
-  set_fact:
+  ansible.builtin.set_fact:
     cloud_provider: "aws"
   when: aws_metadata.status == 200
 
 - name: Set cloud provider fact - Azure
-  set_fact:
+  ansible.builtin.set_fact:
     cloud_provider: "azure"
   when:
     - azure_metadata is defined
@@ -75,7 +75,7 @@
     - cloud_provider is not defined
 
 - name: Set cloud provider fact - GCP
-  set_fact:
+  ansible.builtin.set_fact:
     cloud_provider: "gcp"
   when:
     - gcp_metadata is defined
@@ -83,10 +83,10 @@
     - cloud_provider is not defined
 
 - name: Set cloud provider fact - None/On-Premises
-  set_fact:
+  ansible.builtin.set_fact:
     cloud_provider: "none"
   when: cloud_provider is not defined
 
 - name: Display detected cloud provider
-  debug:
+  ansible.builtin.debug:
     msg: "Detected cloud provider: {{ cloud_provider }}"
